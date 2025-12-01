@@ -82,6 +82,11 @@
             background-color: rgba(0, 255, 0, 0.4);
             animation: pulse 1s infinite;
         }
+        .cell.magic {
+            background-color: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            font-weight: bold;
+        }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -215,6 +220,21 @@
         .toggle-message:hover {
             background: rgba(76, 255, 76, 0.3);
         }
+        .magic-sum {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        .start-instructions {
+            background-color: rgba(76, 255, 76, 0.1);
+            border: 1px solid #4cff4c;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px auto;
+            max-width: 500px;
+        }
         @media (min-width: 768px) {
             .game-area {
                 flex-wrap: nowrap;
@@ -232,13 +252,20 @@
         <h1>BiMath's Invincible Magic Grid</h1>
         <div class="subtitle">Matematika Murni dalam Aksi - Komputer vs Manusia</div>
         <p>
-		<b>This work has benefited from discussions and collaborative engagement with DeepSeek, and its contributions are gratefully acknowledged.</b>
-		</p>
-        <div class="status" id="status">Komputer sedang berpikir...</div>
+            <b>This work has benefited from discussions and collaborative engagement with DeepSeek, and its contributions are gratefully acknowledged.</b>
+        </p>
+        
+        <div class="start-instructions">
+            <p>Saat ini Anda melihat persegi ajaib (Magic Square) 5×5 yang lengkap.</p>
+            <p>Klik tombol "Mulai Permainan Baru" untuk memulai permainan dengan papan kosong!</p>
+        </div>
+        
+        <div class="status" id="status">Klik "Mulai Permainan Baru" untuk memulai!</div>
         
         <div class="game-area">
             <div class="grid-container">
                 <h3>Papan Permainan</h3>
+                <div class="magic-sum">Jumlah Ajaib: 65 (setiap baris, kolom, diagonal)</div>
                 <div class="grid" id="grid">
                     <!-- Grid 5x5 akan diisi oleh JavaScript -->
                 </div>
@@ -261,15 +288,9 @@
                         <p><strong>BiMath's Invincible Magic Grid</strong> adalah bukti nyata bagaimana konsep matematika seperti persegi ajaib, teori grup, dan kombinatorika dapat diterapkan untuk menciptakan strategi yang tak terkalahkan.</p>
                         <p>Di balik setiap algoritma AI yang canggih, terdapat fondasi matematika yang kuat. Dengan memahami matematika, kita tidak hanya menjadi pengguna teknologi, tetapi juga penciptanya.</p>
                         <p><strong>Matematika adalah bahasa alam semesta, dan AI adalah penerjemahnya.</strong></p>
-						<P>
-						"Setiap ahli matematika pernah menjadi pemula. Setiap langkah kecil adalah kemenangan. Hari ini Anda mungkin bingung dengan aljabar, besok Anda bisa menciptakan rumus baru!"
-						</p>
-						<p>
-						"Anda bukan hanya pengajar, tapi <b>penyihir</b> yang membuka mata siswa pada keindahan pola dan logika. Portal ini adalah kotak alat ajaib Anda!"
-						</p>
-						<p>
-						"Matematika bukan hanya untuk sekolah, ia ada dalam seni, musik, alam, teknologi. Setiap kali Anda memecahkan teka-teki, Anda melihat lebih dalam ke dalam struktur alam semesta."
-						</p>
+                        <p>"Setiap ahli matematika pernah menjadi pemula. Setiap langkah kecil adalah kemenangan. Hari ini Anda mungkin bingung dengan aljabar, besok Anda bisa menciptakan rumus baru!"</p>
+                        <p>"Anda bukan hanya pengajar, tapi <b>penyihir</b> yang membuka mata siswa pada keindahan pola dan logika. Portal ini adalah kotak alat ajaib Anda!"</p>
+                        <p>"Matematika bukan hanya untuk sekolah, ia ada dalam seni, musik, alam, teknologi. Setiap kali Anda memecahkan teka-teki, Anda melihat lebih dalam ke dalam struktur alam semesta."</p>
                         <p style="text-align: center; margin-top: 15px; font-style: italic;">- Konsep Orisinal oleh BiMath -</p>
                     </div>
                 </div>
@@ -277,10 +298,11 @@
         </div>
         
         <button onclick="resetGame()">Mulai Permainan Baru</button>
+        <button onclick="showMagicSquare()">Tampilkan Persegi Ajaib</button>
         
         <div class="explanation">
             <h3>Penjelasan Matematika</h3>
-            <p>Permainan ini menggunakan persegi ajaib 5×5 dengan angka 1 hingga 25. Jumlah ajaibnya adalah 65 (rata-rata setiap baris/kolom/diagonal).</p>
+            <p>Persegi ajaib 5×5 di atas mengandung angka 1 hingga 25 dengan jumlah ajaib 65. Setiap baris, kolom, dan diagonal utama berjumlah 65.</p>
             <p>Komputer menggunakan algoritma berdasarkan teori grup dan kombinatorika untuk memastikan kemenangan:</p>
             <ul>
                 <li>Langkah pertama: komputer memilih angka 13 (nilai tengah) dan menempatkannya di pusat grid.</li>
@@ -308,9 +330,10 @@
         // State permainan
         let board = Array(5).fill().map(() => Array(5).fill(null));
         let usedNumbers = new Set();
-        let gameOver = false;
+        let gameOver = true; // Awalnya game over karena hanya menampilkan persegi ajaib
         let selectedNumber = null;
         let isComputerTurn = true;
+        let showingMagicSquare = true; // Flag untuk menandai apakah sedang menampilkan persegi ajaib
 
         // Elemen DOM
         const gridElement = document.getElementById('grid');
@@ -335,6 +358,71 @@
         // Event listener untuk toggle pesan
         mathMessageToggle.addEventListener('click', toggleMathMessage);
         toggleMessage.addEventListener('click', toggleMathMessage);
+
+        // Fungsi untuk menampilkan persegi ajaib lengkap
+        function displayMagicSquare() {
+            showingMagicSquare = true;
+            gameOver = true;
+            
+            // Kosongkan papan state
+            board = Array(5).fill().map(() => Array(5).fill(null));
+            usedNumbers = new Set();
+            
+            // Isi grid dengan persegi ajaib
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+                    if (cell) {
+                        cell.textContent = magicSquare[i][j];
+                        cell.className = 'cell magic';
+                    }
+                }
+            }
+            
+            // Reset angka yang tersedia
+            document.querySelectorAll('.number').forEach(el => {
+                el.classList.remove('used', 'selected');
+            });
+            
+            // Update status
+            statusElement.textContent = "Persegi Ajaib 5×5 (Jumlah setiap baris/kolom/diagonal = 65)";
+            statusElement.classList.remove('win');
+        }
+
+        // Fungsi untuk memulai permainan baru
+        function resetGame() {
+            showingMagicSquare = false;
+            
+            // Reset state permainan
+            board = Array(5).fill().map(() => Array(5).fill(null));
+            usedNumbers = new Set();
+            gameOver = false;
+            selectedNumber = null;
+            isComputerTurn = true;
+
+            // Kosongkan grid
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.className = 'cell';
+            });
+
+            // Reset angka yang tersedia
+            document.querySelectorAll('.number').forEach(el => {
+                el.classList.remove('used', 'selected');
+            });
+            
+            statusElement.textContent = "Komputer sedang berpikir...";
+            statusElement.classList.remove('win');
+
+            // Komputer memulai permainan
+            setTimeout(computerMove, 500);
+        }
+
+        // Fungsi untuk menampilkan kembali persegi ajaib
+        function showMagicSquare() {
+            displayMagicSquare();
+        }
 
         // Inisialisasi grid 5x5
         function initializeGrid() {
@@ -366,7 +454,7 @@
 
         // Pemilih angka oleh manusia
         function selectNumber(number) {
-            if (gameOver || isComputerTurn || usedNumbers.has(number)) return;
+            if (gameOver || isComputerTurn || usedNumbers.has(number) || showingMagicSquare) return;
             
             // Hapus seleksi sebelumnya
             document.querySelectorAll('.number').forEach(el => {
@@ -383,7 +471,7 @@
 
         // Langkah manusia
         function humanMove(row, col) {
-            if (gameOver || isComputerTurn || selectedNumber === null || board[row][col] !== null) return;
+            if (gameOver || isComputerTurn || selectedNumber === null || board[row][col] !== null || showingMagicSquare) return;
             
             // Tempatkan angka di papan
             board[row][col] = selectedNumber;
@@ -424,7 +512,7 @@
 
         // Langkah komputer - menggunakan strategi untuk selalu menang
         function computerMove() {
-            if (gameOver) return;
+            if (gameOver || showingMagicSquare) return;
             
             let number, row, col;
             
@@ -637,29 +725,17 @@
             }
         }
 
-        // Reset permainan
-        function resetGame() {
-            board = Array(5).fill().map(() => Array(5).fill(null));
-            usedNumbers = new Set();
-            gameOver = false;
-            selectedNumber = null;
-            isComputerTurn = true;
-            
-            initializeGrid();
-            initializeNumbers();
-            
-            statusElement.textContent = "Komputer sedang berpikir...";
-            statusElement.classList.remove('win');
-            
-            // Komputer memulai permainan
-            setTimeout(computerMove, 500);
-        }
-
         // Inisialisasi permainan saat halaman dimuat
         window.onload = function() {
             initializeGrid();
             initializeNumbers();
-            resetGame();
+            
+            // Tampilkan persegi ajaib saat awal
+            displayMagicSquare();
+            
+            // Tambahkan tombol kedua untuk menampilkan persegi ajaib
+            const buttonContainer = document.querySelector('.container');
+            const existingButton = document.querySelector('button[onclick="resetGame()"]');
         };
     </script>
 </body>
